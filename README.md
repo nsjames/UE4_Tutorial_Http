@@ -16,11 +16,15 @@ Http requests in UE4 are fairly straight forward, however here are a few pitfall
 # Path: Source/YourProject/YourProject.Build.cs
 PrivateDependencyModuleNames.AddRange(new string[] { "Http", "Json", "JsonUtilities" });
 ```
-**`Http`** is our trusty ue4 http implementation.
-**`Json`** is the json conversion library
-**`JsonUtilities`** has the `FJsonObjectConverter` we will be using to convert Json data to Struct data
+ - **`Http`** is our trusty ue4 http implementation.
+ - **`Json`** is the json conversion library
+ - **`JsonUtilities`** has the `FJsonObjectConverter` we will be using to convert Json data to Struct data
 
-
+#
+#
+#
+#
+#
 ---
 > **At this point you could probably just grab the files and go over them, but here's a detailed explanation as well as some reasoning behind design decisions and a friendly reminder to keep code clean.**
 ---
@@ -38,20 +42,23 @@ PrivateDependencyModuleNames.AddRange(new string[] { "Http", "Json", "JsonUtilit
   - [**Checking for valid Responses**](#checking-for-valid-responses)
   - [**Serialization and Deserialization**](#serialization-and-deserialization)
   - [**Real World Example**](#okay-lets-look-at-some-real-world-http-requests)
+  
 #
 #
 #
 #
 #
-
-## The Header File
-Let's go over some of the **`.h`** layout.
 
 ---
 ### USTRUCTS()
 `FRequest_Login` and `FResponse_Login` are both used to pass data back and forth between `UE4` and your `Back-End Server`.
 I wont be touching on back-end servers but I will be showing the `JSON` that will be sent and returned.
 
+#
+#
+#
+#
+#
 ```
 USTRUCT()
 struct FRequest_Login {
@@ -65,6 +72,11 @@ struct FRequest_Login {
 **`JSON EXAMPLE: { "email":"some@email.com", "password":"strongpassword" }`**
 **`FRequest_Login`** holds the `email` and `password` that we are using to log into our account.
 
+#
+#
+#
+#
+#
 ```
 USTRUCT()
 struct FResponse_Login {
@@ -103,19 +115,35 @@ struct FResponse_Login {
 #
 ---
 ### Internal Methods:
+These are just some methods that you can use to build eloquently written api calls.
+
+#
+#
+#
+#
+#
+
 ```
     TSharedRef<IHttpRequest> RequestWithRoute(FString Subroute);
 	void SetRequestHeaders(TSharedRef<IHttpRequest>& Request);
 ```
-Both `RequestWithRoute` and `SetRequestHeaders` are used to initialize `Http Request Objects`. They shouldn't be called directly, only through the methods below.
+Both `RequestWithRoute` and `SetRequestHeaders` are used to initialize `Http Request Objects`. 
+**They shouldn't be called directly, only through the methods below.**
+
+#
+#
+#
+#
+#
 
 ```
 	TSharedRef<IHttpRequest> GetRequest(FString Subroute);
 	TSharedRef<IHttpRequest> PostRequest(FString Subroute, FString ContentJsonString);
 ```
-`GetRequest` and `PostRequest` are the proper methods to call. I intentionally left out `PutRequest` so that you may implement it using the same structure.
+`GetRequest` and `PostRequest` are the proper methods to call. 
+*I intentionally left out `PutRequest` so that you may implement it using the same structure.*
 
-> *You might be asking **Why not just have one method that accepts a Verb?** - The simple answer is that inserting a string into a parameter is not only sloppy, but will also add error checking and useless complexity to a very simple method.*
+> *You might be asking **Why not just have one method that accepts a Verb?** - The simple answer is that inserting a string into a parameter is not only sloppy, but will also add error checking and useless complexity to a very simple method.* 
 
 
 Let's take a look at the implementations of **`PostRequest`**, **`RequestWithRoute`** and **`SetRequestHeaders`**
@@ -143,11 +171,11 @@ void AHttpService::SetRequestHeaders(TSharedRef<IHttpRequest>& Request) {
 ```
 As you can see, **`PostRequest`** is very simple and uses **`RequestWithRoute`** to build itself, keeping everything nice and clean. 
 The flow for **`PostRequest`** goes as follows:
-  - Get Request Object With a Subroute ( Which internally also sets the headers )
+  - Get `Request Object` with a `subroute` and set it's `Headers`
   - Set the Verb to **`POST`**
   - Set the `RequestObjects`'s Content to a `Json formatted string`
   - Return the `RequestObject`
-
+  
 #
 #
 #
@@ -172,7 +200,7 @@ void AHttpService::Send(TSharedRef<IHttpRequest>& Request) {
 #
 ---
 ### Checking for valid Responses:
-**`ResponseIsValid`** is used to deeply check if a response is valid, and if not then why.
+**`ResponseIsValid`** is used to deeply check if a response is valid.
   - `!bWasSuccessful` is returned from the Http request made by UE4. It's the first check because if it fails no further information will be given.
   - `!Response.IsValid()` is also returned from the UE4 request, and means that most likely the request succeeded, but the response can't be parsed.
   - If the `ResponseCode` is not **`Ok` ( 200 )** then we will also return false, as well as log out the code returned.
@@ -194,13 +222,19 @@ bool AHttpService::ResponseIsValid(FHttpResponsePtr Response, bool bWasSuccessfu
 ---
 ### Serialization and Deserialization
 We're going to be using **`FJsonObjectConverter`** to convert json to scructs and structs to json.
-You can do this manually, but I suggest you use `FJsonObjectConverter`.
-Here's some reasons why:
-  - Support for TArray, event TArray<NestedStruct>
-  - Support for Enum from string/int
-  - Direct conversion into a USTRUCT() which is garbage collected
+Like I said above I suggest you use `FJsonObjectConverter`.
+Here are some reasons why:
+  - Support for TArray, even TArray<NestedStruct>
+  - Support for Enum from string/int ( for example a json of { "itemType":"Weapon" } will become `EItemType itemType = EItemType::Weapon`;
+  - Direct conversion into a USTRUCT() which is garbage collected.
 
-Let's look at the two methods.
+#
+#
+#
+#
+#
+
+Let's look at the two methods that handle serialization and deserialization.
 ##### Get Json String From Struct:
 #
 ```
@@ -210,7 +244,7 @@ void AHttpService::GetJsonStringFromStruct(StructType FilledStruct, FString& Str
 }
 ```
 This method gets a Json Formatted String from a struct of type and binds it to the `StringOutput`.
-We see this in action in the `Login()` method.
+We see this in action in the [`Login()`](#for-the-login-request) method.
 
 ##### Get Struct From Json String:
 #
@@ -223,7 +257,7 @@ void AHttpService::GetStructFromJsonString(FHttpResponsePtr Response, StructType
 }
 ```
 This method does the exact opposite of `GetJsonStringFromStruct()` and binds a Struct using the Json Formatted String to the `StructOutput`.
-We see this in action in the `LoginResponse()` method.
+We see this in action in the [`LoginResponse()`](#for-the-login-response) method.
 
 #
 #
@@ -233,11 +267,14 @@ We see this in action in the `LoginResponse()` method.
 ---
 ### Okay! Let's look at some real world Http Requests!
 I've included a simple login example in the file as well just to illustrate how this all comes together nicely and neatly.
-I have a `Node JS` server running locally that just spits out:
-```
-{ "id":1, "name":"TestName", "hash":"28697734-301a5705-0fbc1f083d2473fe" }
-```
-when the route `/api/user/login` is hit with a correctly formatted `FRequest_Login` Json String.
+
+#
+#
+#
+#
+#
+
+
 ### For the Login (Request)
 ```
 void AHttpService::Login(FRequest_Login LoginCredentials) {
@@ -262,6 +299,12 @@ CALLED FROM BeginPlay():
 	LoginCredentials.password = TEXT("asdfasdf");
 	Login(LoginCredentials);
 ```
+
+#
+#
+#
+#
+#
 
 ### For the Login (Response)
 ```
@@ -305,11 +348,16 @@ We can set the hash for further requests here. Really though, we should be passi
 
 
 
+#
+#
+#
+#
+#
 
 
 
 > **Here's something nifty.**
-> You can pass in more parameters by adding them here, and then binding them to the request like so:
+> You can pass in more parameters by adding them to the **Response Method**, and then binding them to the request like so:
 > `BindUObject(this, &AHttpService::LoginResponse, SomeCustomPlayerState);`
 > Which will allow you to later bind things back by, for instance, calling a method like so:
 > `SomeCustomPlayerState->PlayerLoggedIn(LoginResponse);`
@@ -318,6 +366,3 @@ We can set the hash for further requests here. Really though, we should be passi
 
 
 
-* [AngularJS] - HTML enhanced for web apps!
-
-   [AngularJS]: <http://angularjs.org>
