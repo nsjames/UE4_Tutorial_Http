@@ -31,13 +31,13 @@ PrivateDependencyModuleNames.AddRange(new string[] { "Http", "Json", "JsonUtilit
 #
 #
 # Table Of Contents
-  - [**USTRUCTS()**](#ustructs())
-  - **Some Important Variables**
-  - **Internal Methods**
-  - **Sending a Request**
-  - **Checking for valid Responses**
-  - **Serialization and Deserialization**
-  - **Real World Example**
+  - [**USTRUCTS()**](#ustructs)
+  - [**Some Important Variables**](#some-important-variables)
+  - [**Internal Methods**](#internal-methods)
+  - [**Sending a Request**](#sending-a-request)
+  - [**Checking for valid Responses**](#checking-for-valid-responses)
+  - [**Serialization and Deserialization**](#serialization-and-deserialization)
+  - [**Real World Example**](#okay-lets-look-at-some-real-world-http-requests)
 #
 #
 #
@@ -147,6 +147,7 @@ The flow for **`PostRequest`** goes as follows:
   - Set the Verb to **`POST`**
   - Set the `RequestObjects`'s Content to a `Json formatted string`
   - Return the `RequestObject`
+
 #
 #
 #
