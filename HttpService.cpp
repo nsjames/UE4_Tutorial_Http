@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "tester2.h"
+#include "<PUT_YOUR_GAME_NAME_HERE>.h"
 #include "HttpService.h"
 
 
