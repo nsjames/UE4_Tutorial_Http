@@ -22,7 +22,6 @@ struct FResponse_Login {
 	GENERATED_BODY()
 	UPROPERTY() int id;
 	UPROPERTY() FString name;
-	UPROPERTY() FString email;
 	UPROPERTY() FString hash;
 
 	FResponse_Login() {}
@@ -45,12 +44,12 @@ private:
 
 	TSharedRef<IHttpRequest> GetRequest(FString Subroute);
 	TSharedRef<IHttpRequest> PostRequest(FString Subroute, FString ContentJsonString);
-
 	void Send(TSharedRef<IHttpRequest>& Request);
+
 	bool ResponseIsValid(FHttpResponsePtr Response, bool bWasSuccessful);
 
 	template <typename StructType>
-	void GetJsonStringFromStruct(UScriptStruct* StaticStruct, StructType FilledStruct, FString& StringOutput);
+	void GetJsonStringFromStruct(StructType FilledStruct, FString& StringOutput);
 	template <typename StructType>
 	void GetStructFromJsonString(FHttpResponsePtr Response, StructType& StructOutput);
 public:

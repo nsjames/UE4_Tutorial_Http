@@ -67,7 +67,7 @@ bool AHttpService::ResponseIsValid(FHttpResponsePtr Response, bool bWasSuccessfu
 	}
 }
 
-void AHttpService::SetAuthorizationHash(FString Hash) {
+void AHttpService::SetAuthorizationHash(FString Hash, TSharedRef<IHttpRequest>& Request) {
 	AuthorizationHash = Hash;
 }
 
@@ -78,8 +78,8 @@ void AHttpService::SetAuthorizationHash(FString Hash) {
 
 
 template <typename StructType>
-void AHttpService::GetJsonStringFromStruct(UScriptStruct* StaticStruct, StructType FilledStruct, FString& StringOutput) {
-	FJsonObjectConverter::UStructToJsonObjectString(StaticStruct, &FilledStruct, StringOutput, 0, 0);
+void AHttpService::GetJsonStringFromStruct(StructType FilledStruct, FString& StringOutput) {
+	FJsonObjectConverter::UStructToJsonObjectString(StructType::StaticStruct(), &FilledStruct, StringOutput, 0, 0);
 }
 
 template <typename StructType>
@@ -97,7 +97,7 @@ void AHttpService::GetStructFromJsonString(FHttpResponsePtr Response, StructType
 
 void AHttpService::Login(FRequest_Login LoginCredentials) {
 	FString ContentJsonString;
-	GetJsonStringFromStruct<FRequest_Login>(FRequest_Login::StaticStruct(), LoginCredentials, ContentJsonString);
+	GetJsonStringFromStruct<FRequest_Login>(LoginCredentials, ContentJsonString);
 
 	TSharedRef<IHttpRequest> Request = PostRequest("user/login", ContentJsonString);
 	Request->OnProcessRequestComplete().BindUObject(this, &AHttpService::LoginResponse);
