@@ -56,9 +56,8 @@ I wont be touching on back-end servers but I will be showing the `JSON` that wil
 
 #
 #
-#
-#
-#
+
+**`FRequest_Login`** holds the `email` and `password` that we are using to log into our account.
 ```
 USTRUCT()
 struct FRequest_Login {
@@ -70,13 +69,11 @@ struct FRequest_Login {
 };
 ```
 **`JSON EXAMPLE: { "email":"some@email.com", "password":"strongpassword" }`**
-**`FRequest_Login`** holds the `email` and `password` that we are using to log into our account.
 
 #
 #
-#
-#
-#
+
+**`FResponse_Login`** holds the returned response from the login request. 
 ```
 USTRUCT()
 struct FResponse_Login {
@@ -89,9 +86,7 @@ struct FResponse_Login {
 };
 ```
 **`JSON EXAMPLE: { "id":1, "name":"Batman", "hash":"asdf-qwer-dfgh-erty" }`**
-**`FResponse_Login`** holds the returned response from the login request. 
 
-#
 #
 #
 
@@ -119,9 +114,6 @@ These are just some methods that you can use to build eloquently written api cal
 
 #
 #
-#
-#
-#
 
 ```
     TSharedRef<IHttpRequest> RequestWithRoute(FString Subroute);
@@ -130,9 +122,6 @@ These are just some methods that you can use to build eloquently written api cal
 Both `RequestWithRoute` and `SetRequestHeaders` are used to initialize `Http Request Objects`. 
 **They shouldn't be called directly, only through the methods below.**
 
-#
-#
-#
 #
 #
 
@@ -230,9 +219,6 @@ Here are some reasons why:
 
 #
 #
-#
-#
-#
 
 Let's look at the two methods that handle serialization and deserialization.
 ##### Get Json String From Struct:
@@ -270,9 +256,6 @@ I've included a simple login example in the file as well just to illustrate how 
 
 #
 #
-#
-#
-#
 
 
 ### For the Login (Request)
@@ -300,9 +283,6 @@ CALLED FROM BeginPlay():
 	Login(LoginCredentials);
 ```
 
-#
-#
-#
 #
 #
 
