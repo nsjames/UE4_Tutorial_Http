@@ -42,6 +42,7 @@ PrivateDependencyModuleNames.AddRange(new string[] { "Http", "Json", "JsonUtilit
   - [**Checking for valid Responses**](#checking-for-valid-responses)
   - [**Serialization and Deserialization**](#serialization-and-deserialization)
   - [**Real World Example**](#okay-lets-look-at-some-real-world-http-requests)
+  - [**Passing Back Data**](#passing-back-data)
   
 #
 #
@@ -335,14 +336,51 @@ We can set the hash for further requests here. Really though, we should be passi
 #
 
 
+---
+### Passing Back Data
+Here's how to pass back some data after the HTTP Request has succeeded.
+Let's take our `Login` and `LoginResponse` and revamp them a bit.
 
-> **Here's something nifty.**
-> You can pass in more parameters by adding them to the **Response Method**, and then binding them to the request like so:
-> `BindUObject(this, &AHttpService::LoginResponse, SomeCustomPlayerState);`
-> Which will allow you to later bind things back by, for instance, calling a method like so:
-> `SomeCustomPlayerState->PlayerLoggedIn(LoginResponse);`
-> This gives you a flow similar to a `Promise` ( `doApiCall.then()` ) in javascript.
-  
+#
+#
+##### header file
+#
+
+```
+    void Login(FRequest_Login LoginCredentials, ACustomPlayerState PlayerState);
+	void LoginResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful, ACustomPlayerState PlayerState);
+```
+#
+#
+##### cpp file
+#
+
+```
+void AHttpService::Login(FRequest_Login LoginCredentials, ACustomPlayerState PlayerState) {
+	FString ContentJsonString;
+	GetJsonStringFromStruct<FRequest_Login>(LoginCredentials, ContentJsonString);
+
+	TSharedRef<IHttpRequest> Request = PostRequest("user/login", ContentJsonString);
+	Request->OnProcessRequestComplete().BindUObject(this, &AHttpService::LoginResponse, PlayerState);
+	Send(Request);
+}
+
+void AHttpService::LoginResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful, ACustomPlayerState PlayerState) {
+	if (!ResponseIsValid(Response, bWasSuccessful)) return;
+
+	FResponse_Login LoginResponse;
+	GetStructFromJsonString<FResponse_Login>(Response, LoginResponse);
+    PlayerState->PlayerLoginSuccessful(LoginResponse);
+}
+```
+#
+Notice the `PlayerState` inside of the `Request->OnProcessRequestComplete().BindUObject(this, &AHttpService::LoginResponse, PlayerState);` now. 
+
+We're passing a reference so the player state into the delegate to be used when the request finishes.
+
+**For the sake of clean code** you should not be doing any non-http logic here. 
+Pass your response data somewhere else and handle it there. APIs tend to be quite large and if you put all of your logic inside of your HttpService it will be too large to handle in the future.
+
 
 
 
