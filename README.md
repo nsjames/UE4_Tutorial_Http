@@ -347,8 +347,8 @@ Let's take our `Login` and `LoginResponse` and revamp them a bit.
 #
 
 ```
-    void Login(FRequest_Login LoginCredentials, ACustomPlayerState PlayerState);
-	void LoginResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful, ACustomPlayerState PlayerState);
+    void Login(FRequest_Login LoginCredentials, ACustomPlayerState* PlayerState);
+	void LoginResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful, ACustomPlayerState* PlayerState);
 ```
 #
 #
@@ -356,7 +356,7 @@ Let's take our `Login` and `LoginResponse` and revamp them a bit.
 #
 
 ```
-void AHttpService::Login(FRequest_Login LoginCredentials, ACustomPlayerState PlayerState) {
+void AHttpService::Login(FRequest_Login LoginCredentials, ACustomPlayerState* PlayerState) {
 	FString ContentJsonString;
 	GetJsonStringFromStruct<FRequest_Login>(LoginCredentials, ContentJsonString);
 
@@ -365,7 +365,7 @@ void AHttpService::Login(FRequest_Login LoginCredentials, ACustomPlayerState Pla
 	Send(Request);
 }
 
-void AHttpService::LoginResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful, ACustomPlayerState PlayerState) {
+void AHttpService::LoginResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful, ACustomPlayerState* PlayerState) {
 	if (!ResponseIsValid(Response, bWasSuccessful)) return;
 
 	FResponse_Login LoginResponse;
